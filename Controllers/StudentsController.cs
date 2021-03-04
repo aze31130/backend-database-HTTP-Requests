@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using backend_database_HTTP_Requests.Data;
+using backend_database_HTTP_Requests.DTO;
 using backend_database_HTTP_Requests.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,18 +21,47 @@ namespace backend_database_HTTP_Requests.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Student>>> GetValues()
+        public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudents()
         {
-            var values = await _context.Students.ToListAsync();
-            if (values != null)
-            {
-                return values;
-            }
-            else
+            var student = from students in _context.Students join students_descriptions in _context.Students_Description on students.id equals students_descriptions.studentId
+                          select new StudentDTO {
+                              studentId = students.id,
+                              age = students_descriptions.age,
+                              firstName = students_descriptions.firstName,
+                              lastName = students_descriptions.lastName,
+                              adress = students_descriptions.adress,
+                              country = students_descriptions.country,
+                              grade = students.grade
+                          };
+
+            return await student.ToListAsync();
+        }
+
+        [HttpGet("{id}")]
+        public ActionResult<StudentDTO> GetStudents_byId(int id)
+        {
+            var student = from students in _context.Students
+                          join students_descriptions in _context.Students_Description on students.id equals students_descriptions.studentId
+                          select new StudentDTO
+                          {
+                              studentId = students.id,
+                              age = students_descriptions.age,
+                              firstName = students_descriptions.firstName,
+                              lastName = students_descriptions.lastName,
+                              adress = students_descriptions.adress,
+                              country = students_descriptions.country,
+                              grade = students.grade
+                          };
+
+            var student_by_id = student.ToList().Find(x => x.studentId == id);
+
+            if (student_by_id == null)
             {
                 return NotFound();
             }
+            return student_by_id;
         }
+
 
         [HttpPost]
         public async Task<ActionResult<Student>> Post_Values(Student student)

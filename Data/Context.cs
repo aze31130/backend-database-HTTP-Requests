@@ -7,5 +7,6 @@ namespace backend_database_HTTP_Requests.Data
     {
         public Context(DbContextOptions<Context> options) : base(options) { }
         public DbSet<Student> Students { get; set; }
+        public DbSet<Student_description> Students_Description { get; set; }
     }
 }
