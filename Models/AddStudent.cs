@@ -7,8 +7,6 @@ namespace backend_database_HTTP_Requests.Models
         [Required]
         public string grade { get; set; }
         [Required]
-        public int studentId { get; set; }
-        [Required]
         public int age { get; set; }
         [Required]
         public string firstName { get; set; }

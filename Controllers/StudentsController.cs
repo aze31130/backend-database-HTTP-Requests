@@ -64,7 +64,7 @@ namespace backend_database_HTTP_Requests.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<AddStudent>> Add_Students(AddStudent studentDTO)
+        public async Task<ActionResult> Add_Students(AddStudent studentDTO)
         {
             if (!ModelState.IsValid)
             {
