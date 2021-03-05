@@ -64,56 +64,80 @@ namespace backend_database_HTTP_Requests.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<Student>> Post_Values(Student student)
+        public async Task<ActionResult<AddStudent>> Add_Students(AddStudent studentDTO)
         {
-            _context.Students.Add(student);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var student = new Student()
+            {
+                grade = studentDTO.grade
+            };
+            await _context.Students.AddAsync(student);
             await _context.SaveChangesAsync();
-            return CreatedAtAction("GetValues", new { id = student.id }, student);
+
+            var student_description = new Student_description()
+            {
+                studentId = student.id,
+                firstName = studentDTO.firstName,
+                lastName = studentDTO.lastName,
+                age = studentDTO.age,
+                adress = studentDTO.country,
+                country = studentDTO.country
+            };
+            await _context.AddAsync(student_description);
+
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetStudents", new { id = student.id }, studentDTO);
         }
 
+
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Student>> Delete_values(int id)
+        public async Task<ActionResult<Student>> Delete_Students(int id)
         {
-            var values = await _context.Students.FindAsync(id);
-            if (values == null)
+            var student = _context.Students.Find(id);
+            var student_description = _context.Students_Description.SingleOrDefault(x => x.studentId == id);
+
+            if (student == null)
             {
                 return NotFound();
             }
-            _context.Students.Remove(values);
-            await _context.SaveChangesAsync();
-            return values;
+            else
+            {
+                _context.Remove(student);
+                _context.Remove(student_description);
+                await _context.SaveChangesAsync();
+                return student;
+            }
         }
 
-
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put_Values(int id, Student student)
+        public async Task<ActionResult> Update_Students(int id, StudentDTO student)
         {
-            if (id != student.id)
+            if (id != student.studentId || !StudentExists(id))
             {
                 return BadRequest();
             }
-
-            _context.Entry(student).State = EntityState.Modified;
-
-            try
+            else
             {
+                var students = _context.Students.SingleOrDefault(x => x.id == id);
+                var students_description = _context.Students_Description.SingleOrDefault(x => x.studentId == id);
+                students.id = student.studentId;
+                students.grade = student.grade;
+                students_description.firstName = student.firstName;
+                students_description.lastName = student.lastName;
+                students_description.age = student.age;
+                students_description.adress = student.adress;
+                students_description.country = student.country;
                 await _context.SaveChangesAsync();
+                return NoContent();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ValuesExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return NoContent();
         }
 
-        private bool ValuesExists(int id)
+        private bool StudentExists(int id)
         {
             return _context.Students.Any(x => x.id == id);
         }

@@ -31,9 +31,29 @@ namespace backend_database_HTTP_Requests.Controllers
             {
                 Date = DateTime.Now.AddDays(index),
                 TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
+                Summary = Summaries[rng.Next(Summaries.Length)],
+                DorsetCollege = "We are pushing our changes to GitHub"
             })
             .ToArray();
+        }
+
+        [HttpGet("list")]
+        public IEnumerable<string> Get_List()
+        {
+            return Summaries.ToList();
+        }
+
+        [HttpGet("list/{id}")]
+        public string Get_list_byId(int id)
+        {
+            if(id < 0 || id > Summaries.Length - 1)
+            {
+                return new string("not found");
+            }
+            else
+            {
+                return Summaries[id];
+            }
         }
     }
 }
